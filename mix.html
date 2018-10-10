@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+	<head>
+	    <title>Geolocation</title>
+        <link rel="stylesheet" href="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/css/bootstrap.min.css" />  
+        <script src="https://cdn.static.runoob.com/libs/jquery/2.1.1/jquery.min.js"></script>
+        <script src="https://cdn.static.runoob.com/libs/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="http://www.bootcss.com/p/buttons/css/buttons.css" />
+		<style>
+			.playerbutton{
+				display: inline-block;
+				*display: inline;
+				zoom: 1;
+				white-space: nowrap;
+				margin-right: 44px;	
+				font-size:30px;
+			}
+			.textArea {
+				border:0; 
+				font-size:20px;  
+				height: auto;
+				height:370px;
+				width:400px;
+				opacity:0.2;
+			}
+			body {
+				background: url(blurred.jpg) no-repeat center top;
+				-webkit-background-size: cover;
+				-moz-background-size: cover;
+				background-size: cover;
+				margin-top：10px;
+			}
+			.input_text{
+			opacity:0.3;
+			}
+			
+		</style>
+		<script type="text/javascript">
+
+			var tag = document.createElement('script');
+
+			tag.src = "https://www.youtube.com/iframe_api";
+			var firstScriptTag = document.getElementsByTagName('script')[0];
+			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+			// 3. This function creates an <iframe> (and YouTube player)
+			//    after the API code downloads.
+			var player;
+			var video_index = 0;
+			var myVideo = new Array();
+			function onYouTubeIframeAPIReady() {
+				player = new YT.Player('youtubeVideo', {
+					height: '360',
+					width: '640',
+					videoId: '3ZfN88tAb_Y',
+
+					events: {
+						'onReady': onPlayerReady,
+						'onStateChange': onPlayerStateChange
+					}
+				});
+			}
+
+			// 4. The API will call this function when the video player is ready.
+			function onPlayerReady(event) {
+				event.target.playVideo();
+			}
+
+			// 5. The API calls this function when the player's state changes.
+			//    The function indicates that when playing a video (state=1),
+			//    the player should play for six seconds and then stop.
+			var done = false;
+			function onPlayerStateChange(event) {
+				if (event.data == YT.PlayerState.PLAYING && !done) {
+					setTimeout(stopVideo, 6000);
+					done = true;
+				}
+			}
+			function stopVideo() {
+				player.stopVideo();
+			}
+			
+			function next(){
+				video_index = (video_index+1)%10;
+				player.loadVideoById(myVideo[video_index]);
+				
+			}
+			
+			function pre(){
+				video_index = (video_index+9)%10;
+				player.loadVideoById(myVideo[video_index]);
+				
+			}
+			
+			function play(){
+				if( player.getPlayerState()== 1 )
+					player.pauseVideo();
+				else
+					player.playVideo();
+			}
+
+			
+			$(document).ready(function () {
+                $("#mix").click(function () {
+					var artistName = $("#artistName").val();
+					var userAcount = $("#userAcount").val();
+					var checkValue=$("#menu").val();
+					
+						if ( "drop-topSongs" == checkValue && "" != artistName ){
+							$.ajax({
+									url: "http://localhost/slim/public/index.php/gettoptracksyoutube/"+artistName,
+									type: "GET",
+									Accept: "application/json",
+									success: function (data) {
+										dataSource = eval('('+data+')');
+										var i = 0;
+										for( var p in dataSource ){
+											myVideo[i] = dataSource[p].ID;
+											i++;
+											
+										}
+										player.loadVideoById(myVideo[0]);
+									},
+									error: function (XMLHttpRequest, textStatus, errorThrown) {
+										alert("artist name can not be empty!!!");
+									}
+								});
+						}
+						if ( "drop-similarSongs" == checkValue && "" != artistName){
+							$.ajax({
+									url: "http://localhost/slim/public/index.php/similarArtistTracksyoutube/"+artistName,
+									type: "GET",
+									Accept: "application/json",
+									success: function (data) {
+										dataSource = eval('('+data+')');
+										var i = 0;
+										for( var p in dataSource ){
+											myVideo[i] = dataSource[p].ID;
+											i++;
+											
+										}
+										player.loadVideoById(myVideo[0]);
+									},
+									error: function (XMLHttpRequest, textStatus, errorThrown) {
+										alert("artist name can not be empty!!!");
+									}
+								});
+						}
+						if ( "drop-topAlbums" == checkValue && "" != artistName){
+							$.ajax({
+									url: "http://localhost/slim/public/index.php/topAlbumSongsyoutube/"+artistName,
+									type: "GET",
+									Accept: "application/json",
+									success: function (data) {
+										dataSource = eval('('+data+')');
+										var i = 0;
+										for( var p in dataSource ){
+											myVideo[i] = dataSource[p].ID;
+											i++;
+											
+										}
+										player.loadVideoById(myVideo[0]);
+									},
+									error: function (XMLHttpRequest, textStatus, errorThrown) {
+										alert("artist name can not be empty!!!");
+									}
+								});
+						}
+					
+					if ( "" != userAcount){
+						var test = $("#test");
+						$.ajax({
+								url: "http://localhost/slim/public/index.php/userRecentTracksyoutube/"+userAcount,
+								type: "GET",
+								Accept: "application/json",
+								success: function (data) {
+									
+									dataSource = eval('('+data+')');
+									
+									var i = 0;
+									for( var p in dataSource ){
+										myVideo[i] = dataSource[p].ID;
+										i++;
+										
+									}
+									player.loadVideoById(myVideo[0]);
+								},
+								error: function (XMLHttpRequest, textStatus, errorThrown) {
+									alert("user account can not be empty!!!");
+								}
+							});
+					}
+                });
+            });
+			
+			
+               
+			$(document).ready(function () {
+                $("#searchArtist").click(function () {
+                    var test = $("#test");
+					var artistName = $("#artistName").val();
+					var checkValue=$("#menu").val();
+					if ( "drop-topSongs" == checkValue ){
+						$.ajax({
+								url: "http://localhost/slim/public/index.php/gettoptrackslist/"+artistName,
+								type: "GET",
+								Accept: "application/json",
+								success: function (data) {
+									var data = eval('('+data+')');
+									test.val('');
+									for(var p in data){
+										var artist = data[p].artist;
+										var song = data[p].name;
+										var playCount = data[p].playcount;
+										var text = artist+"--"+song+"--"+playCount;
+										test.val(test.val()+text+'\n');
+									}
+								},
+								error: function (XMLHttpRequest, textStatus, errorThrown) {
+									alert(textStatus);
+									alert(XMLHttpRequest.readyState);
+									alert(XMLHttpRequest.status);
+								}
+							});
+					}
+					if ( "drop-similarSongs" == checkValue){
+						$.ajax({
+								url: "http://localhost/slim/public/index.php/similarArtistTrackslist/"+artistName,
+								type: "GET",
+								Accept: "application/json",
+								success: function (data) {
+									var data = eval('('+data+')');
+									test.val('');
+									for(var p in data){
+										var artist = data[p].artist;
+										var song = data[p].name;
+										var text = artist+"--"+song;
+										test.val(test.val()+text+'\n');
+									}
+								},
+								error: function (XMLHttpRequest, textStatus, errorThrown) {
+									alert("artist name can not be empty!!!");
+								}
+							});
+					}
+					if ( "drop-topAlbums" == checkValue){
+						$.ajax({
+								url: "http://localhost/slim/public/index.php/topAlbumSongslist/"+artistName,
+								type: "GET",
+								Accept: "application/json",
+								success: function (data) {
+									var data = eval('('+data+')');
+									test.val('');
+									for(var p in data){
+										var artist = data[p].artist;
+										var song = data[p].name;
+										
+										var text = artist+"--"+song;
+										test.val(test.val()+text+'\n');
+									}
+								},
+								error: function (XMLHttpRequest, textStatus, errorThrown) {
+									alert("artist name can not be empty!!!");
+								}
+							});
+					}
+					
+					
+                });
+            });
+			
+			$(document).ready(function () {
+                $("#searchUser").click(function () {
+                    var test = $("#test");
+					//var textArea = $("#query").val();
+					var userAcount = $("#userAcount").val();
+					
+						$.ajax({
+								url: "http://localhost/slim/public/index.php/userRecentTrackslist/"+userAcount,
+								type: "GET",
+								Accept: "application/json",
+								success: function (data) {
+									var data = eval('('+data+')');
+									test.val('');
+									for(var p in data){
+										var artist = data[p].artist;
+										var song = data[p].name;
+										var text = artist+"--"+song;
+										test.val(test.val()+text+'\n');
+									}
+								},
+								error: function (XMLHttpRequest, textStatus, errorThrown) {
+									alert("user name can not be empty!!!");
+								}
+							});
+					
+                });
+            });
+			
+            </script>
+	</head>
+	<body>
+	<nav class="navbar navbar-default" role="navigation" style="background:#330066">
+		<div class="container-fluid"> 
+			<div class="navbar-header">
+				<a class="navbar-brand" href="#"><span class="glyphicon glyphicon-headphones">&nbsp </span>Music Video <span class="glyphicon glyphicon-eye-open">&nbsp</span></a>
+			</div>
+			<div class="collapse navbar-collapse" id="example-navbar-collapse">
+			</div>	
+		</div>
+	</nav>
+	
+	<div class="container">
+		<div id="search-bar" class="row">
+			<div class="col-md-3">
+				<div class="btn-group btn-input" id="mixbuilder-dropdown">
+					<select id = "menu" class="btn btn-default dropdown-toggle form-control" >
+						<option value="drop-topSongs">Top Songs By</option>
+						<option value="drop-similarSongs">Similar Artist Songs</option>
+						<option value="drop-topAlbums">Top Album Song</option>
+					</select>
+				</div>
+			</div>
+			
+			
+			<div class="col-md-3">
+				<div class="input-group" >
+					
+						<input id="artistName" type="text" class="form-control" placeholder="Artist" value=""/>
+						<span class="input-group-btn">
+							<input type="button" id="searchArtist" class="btn btn-default" value="Go!" />
+								
+						</span>
+				</div>
+			</div>
+			<div class="col-md-3">
+				<div class="input-group" >
+						<input id="userAcount" type="text" class="form-control" placeholder="User Account" value=""/>
+						<span class="input-group-btn">
+							<button id="searchUser" class="btn btn-default" type="button">
+								Go!
+							</button>
+						</span>
+				</div>
+			</div>
+		</div>
+	</div>
+		
+	<div id="query-container" style="heigh:430px;margin-left:30px;float:left;width:400px;margin-top:20px">
+		<div style="height:390px;">
+			<textarea id ="test" class="textArea" > 
+			</textarea>
+		</div>
+		<div style="height:30px;margin-left:230px;margin-bottom:20px;margin-top:10px">
+			<button type="button" id="mix">See video</button>
+		</div>
+	</div>
+	
+	
+	<div id="play-container" style="heigh:40%;width:500px;margin-top:20px;float:left;margin-left:100px" >
+		<div id="youtubeVideo" >
+			
+		</div>
+		
+		<div id="button-container" style="margin-left:200px;margin-bottom:20px;margin-top:10px;" >
+			<div class="playerbutton"><a href="javascript:void(0);" id="prevbutton" onclick="pre()"><span id="prevb" alt="Prev" class="glyphicon glyphicon-step-backward" ></span></a> </div>
+			<div class="playerbutton"><a href="javascript:void(0);" id="playpause" onclick="play()"><span id="playpb" alt="Play/Pause" class="glyphicon glyphicon-play-circle"></span></a> </div>
+			<div class="playerbutton"><a href="javascript:void(0);" id="nextbutton" onclick="next()"><span id="nextb" alt="Next" class="glyphicon glyphicon-step-forward"></span></a> </div>
+		</div>
+	</div>
+	
+	</body>
+</html>
